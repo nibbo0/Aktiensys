@@ -1,0 +1,20 @@
+<header>
+  <nav class="headerNav">
+    <div class="nav-center">
+      <a class="headerItem {% if active == 'home' %}active{% endif %}" href="/home">
+        <img id="headerHomeSVG" src="/static/img/home.svg" alt="Home">
+      </a>
+      <a class="headerItem {% if active == 'kursansicht' %}active{% endif %}" href="/kursansicht">
+        <img id="headerKursansichtSVG" src="/static/img/monitoring.svg" alt="Kursansicht">
+      </a>
+    </div>
+    <div class="nav-right">
+      <a class="headerItem {% if active == 'settings' %}active{% endif %}" href="/settings">
+        <img id="headerSettingsSVG" src="/static/img/settings.svg" alt="Settings">
+      </a>
+      <button id="refreshBtn" class="headerItem" title="Seite neu laden" onclick="location.reload()" style="background: none; border: none; cursor: pointer; padding: 0;">
+        <img id="headerRefreshSVG" src="/static/img/refresh.svg" alt="Refresh">
+      </button>
+    </div>
+  </nav>
+</header>

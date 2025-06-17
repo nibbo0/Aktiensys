@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>D(AU)-Jones Index</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/static/js/kursSimulation.js" defer></script>
+    <script src="/static/js/kursGraph.js" defer></script>
+    <script src="/static/js/kursAnsicht.js" defer></script>
+  </head>
+  <body>
+    {% include 'header.html' %}
+    <div class="main-content">
+      
+      <h1>Kursübersicht
+        <button id="toggleHeader" class="header-toggle">
+          <svg viewBox="0 0 24 24" width="24" height="24">
+            <path fill="currentColor" d="M7.41,15.41L12,10.83L16.59,15.41L18,14L12,8L6,14L7.41,15.41Z"/>
+          </svg>
+        </button>
+      </h1>
+      <canvas id="kursChart"></canvas>
+    </div>
+    <div id="app"></div>
+  </body>
+</html>
