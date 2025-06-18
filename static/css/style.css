@@ -1,0 +1,212 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #3f7fa7;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+header {
+    background-color: #003e61;
+    border-radius: 20px;
+    color: white;
+    padding: 20px 10px;
+    margin: 24px 24px 10px 24px;
+    box-shadow:
+        0 4px 24px 0 rgba(0,0,0,0.6),
+        0 1.5px 8px 0 #00c3ff44;
+    align-content: center;
+}
+.headerNav {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end; /* nav-right bleibt rechts */
+    padding: 0 30px;
+    font-size: 40px;
+}
+
+.nav-center {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.headerItem {
+    display: inline-block;
+    margin: 0px;
+    text-decoration: none;
+    color: #ffffff;
+    transition: color 0.2s;
+}
+
+.headerItem:hover {
+    color: #e08b14;
+}
+
+.headerItem.active {
+    color: #0386c3;
+}
+
+#headerHomeSVG,
+#headerSettingsSVG,
+#headerRefreshSVG,
+#headerKursansichtSVG {
+    width: 45px;
+    height: 45px;
+    vertical-align: middle;
+}
+
+#headerRefreshSVG,
+#headerSettingsSVG {
+    transition: filter 0.2s, transform 0.5s cubic-bezier(.4,2,.6,1); 
+}
+
+#headerHomeSVG,
+#headerKursansichtSVG {
+    transition: filter 0.1s, transform 0.6s cubic-bezier(.4,2,.6,1);
+}
+
+#headerSettingsSVG:hover,
+#headerHomeSVG:hover,
+#headerRefreshSVG:hover,
+#headerKursansichtSVG:hover {
+    filter: invert(62%) sepia(89%) saturate(749%) hue-rotate(2deg) brightness(104%) contrast(101%);
+}
+
+#refreshBtn:hover #headerRefreshSVG,
+#headerSettingsSVG:hover {
+    transform: rotate(180deg);
+}
+
+.headerItem:hover #headerHomeSVG,
+.headerItem:hover #headerKursansichtSVG{
+    transform: scale(1.2)
+}
+
+.header-toggle {
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    transition: transform 0.3s, background-color 0.3s;
+    width: 40px;
+    height: 40px;
+}
+.header-toggle:hover {
+    scale: 1.5;
+}
+
+.header-hidden .header-toggle {
+    transform: rotate(180deg);
+}
+
+header {
+    transition: transform 0.3s, margin 0.3s;
+    height: 60px;
+    margin: 24px 24px 10px 24px;
+}
+
+.header-hidden header {
+    transform: translateY(-100%);
+    margin-bottom: -70px; /* Header-Höhe + margin-bottom */
+}
+
+footer {
+  margin-top: auto;
+}
+
+/* Content styles */
+/* /firmen */
+
+.main-content {
+    flex: 1 1 auto;
+    margin: 10px 24px 24px 24px;
+    background-color: #003e61;
+    border-radius: 20px;
+    box-shadow:
+        0 4px 24px 0 rgba(0,0,0,0.6),
+        0 1.5px 8px 0 #00c3ff44;
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    color: #ffffff;
+    transition: margin 0.3s;
+}
+
+
+.main-content h1 {
+    color: #ffffff;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.firmen-list-header,.button-bar, .firmen-list-row {
+    display: grid;
+    grid-template-columns: 40px 1.5fr 80px 1fr 1fr 1fr 80px;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+}
+.firmen-list-header {
+    font-weight: bold;
+    border-bottom: 2px solid #e08b14;
+    margin-bottom: 8px;
+}
+.firmen-list-row {
+    background: rgba(255,255,255,0.04);
+    border-radius: 8px;
+    margin-bottom: 6px;
+}
+
+.firmen-list-row input[type="text"] {
+    background-color: transparent;
+    color: #ffffff;
+    font-size: 16px;
+    border: none;
+}
+.firmen-list-row input[type="number"] {
+    width: 90px;
+    padding: 4px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+.firmen-list-row button, .button-bar button {
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: none;
+    background: #e08b14;
+    color: #fff;
+    cursor: pointer;
+    font-weight: bold;
+}
+.firmen-list-row button:hover,
+.button-bar button:hover {
+    background: #ffb84d;
+    color: #222;
+}
+
+.button-bar button{
+    height: 40px;
+    width: 165px;
+}
