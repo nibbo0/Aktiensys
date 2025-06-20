@@ -46,3 +46,9 @@ def get_price_preview(db: Connection, stock_id: int, num_entries: int = 1):
         # inconsistency in behavior because cursor.fetchmany() handles no
         # results differently from cursor.fetchone().
         return cursor.fetchmany(num_entries)
+
+
+def list_stock(db: Connection):
+    with db.cursor(cursor_type=READ_ONLY) as cursor:
+        cursor.execute("""SELECT id, stock_name FROM stocks""")
+        return cursor.fetchall()

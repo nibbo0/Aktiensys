@@ -12,6 +12,9 @@ def create_app(config=None):
     from frontend import front
     app.register_blueprint(front)
 
+    from api import api
+    app.register_blueprint(api)
+
     import db
     db.init_app(app)
 
