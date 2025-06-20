@@ -9,6 +9,7 @@ from db import get_db, stock, exceptions
 class ApiError(Enum):
     INPUT = 'invalid-input'
     STATE = 'invalid-state'
+    NOT_FOUND = 'not-found'
 
     def http_code(self) -> int:
         match self:
@@ -38,10 +39,18 @@ def get_stock_price(stock_id: int = None):
     get_price = partial(stock.get_price_history, db, num_entries=history_len)
     prices = {}
     if stock_id is None:
-        for stock_id, _ in stock.list_stocks(db):
+        for stock_data in stock.list_stocks(db):
+            stock_id = stock_data["id"]
             prices[stock_id] = get_price(stock_id)
     else:
-        prices[stock_id] = get_price(stock_id)
+        # FIXME this should be handled in a separate function
+        price = get_price(stock_id)
+        if price is None:
+            # FIXME this arm is never visited because even a nonexistent stock
+            # just returns an empty list
+            return ApiError.NOT_FOUND.as_response(
+                f"Aktie mit id '{stock_id}' konnte nicht gefunden werden.")
+        prices[stock_id] = price
     return prices
 
 
@@ -53,7 +62,8 @@ def get_stock_preview(stock_id: int = None):
     get_preview = partial(stock.get_price_preview, db, num_entries=preview_len)
     previews = {}
     if stock_id is None:
-        for stock_id, _ in stock.list_stocks(db):
+        for stock_data in stock.list_stocks(db):
+            stock_id = stock_data["id"]
             previews[stock_id] = get_preview(stock_id)
     else:
         previews[stock_id] = get_preview(stock_id)
@@ -82,11 +92,10 @@ def create_stocks():
 def get_stock(stock_id: int):
     db = get_db()
     stocks = stock.show_stock(db, stock_id)
-    if stocks is not None:
-        return stocks
-    else:
-        return ApiError.INPUT.as_response(
+    if stocks is None:
+        return ApiError.NOT_FOUND.as_response(
             f"Aktie mit id '{stock_id}' konnte nicht gefunden werden.")
+    return stocks
 
 
 @api.route('/aktien/')
