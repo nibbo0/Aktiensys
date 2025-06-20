@@ -79,7 +79,7 @@ def show_stock(db: Connection, stock_id: int):
         return dict(zip(cursor.metadata["field"], cursor.fetchone()))
 
 
-def list_stock(db: Connection):
+def list_stocks(db: Connection):
     with db.cursor(cursor_type=READ_ONLY) as cursor:
         cursor.execute("""SELECT id, stock_name FROM stocks""")
         return cursor.fetchall()

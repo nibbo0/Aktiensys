@@ -38,7 +38,7 @@ def get_stock_price(stock_id: int = None):
     get_price = partial(stock.get_price_history, db, num_entries=history_len)
     prices = {}
     if stock_id is None:
-        for stock_id, _ in stock.list_stock(db):
+        for stock_id, _ in stock.list_stocks(db):
             prices[stock_id] = get_price(stock_id)
     else:
         prices[stock_id] = get_price(stock_id)
@@ -53,7 +53,7 @@ def get_stock_preview(stock_id: int = None):
     get_preview = partial(stock.get_price_preview, db, num_entries=preview_len)
     previews = {}
     if stock_id is None:
-        for stock_id, _ in stock.list_stock(db):
+        for stock_id, _ in stock.list_stocks(db):
             previews[stock_id] = get_preview(stock_id)
     else:
         previews[stock_id] = get_preview(stock_id)
@@ -92,6 +92,6 @@ def get_stock(stock_id: int):
 @api.route('/aktien/')
 def get_stocks():
     db = get_db()
-    stocks = stock.list_stock(db)
+    stocks = stock.list_stocks(db)
     return [{"id": stock_id, "name": stock_name}
             for stock_id, stock_name in stocks]
