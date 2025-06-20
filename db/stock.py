@@ -10,7 +10,7 @@ def get_price_current(db: Connection, stock_id: int):
     WHERE stock_id = (?) AND valid_after <= NOW()
     ORDER BY valid_after DESC
     """
-    return read_value(db, sql, stock_id, fetch_num=1)
+    return read_value(db, sql, stock_id, fetch_rows="first")
 
 
 def get_price_history(db: Connection, stock_id: int, num_entries: int = 1):
@@ -18,25 +18,19 @@ def get_price_history(db: Connection, stock_id: int, num_entries: int = 1):
     WHERE stock_id = (?) AND valid_after <= NOW()
     ORDER BY valid_after DESC
     """
-    return read_value(db, sql, stock_id, fetch_num=num_entries)
+    return read_value(db, sql, stock_id, fetch_rows=num_entries)
 
 
 def get_price_preview(db: Connection, stock_id: int, num_entries: int = 1):
-    with db.cursor(cursor_type=READ_ONLY) as cursor:
-        # FIXME fix time check by converting to unix timestamp
-        cursor.execute(
-            """SELECT price, valid_after FROM prices
-            WHERE
-                stock_id = (?) AND valid_after > NOW()
-            ORDER BY valid_after ASC
-            """,
-            (stock_id,)
-        )
-        # FIXME returning more than one entry is contrary to the HTTP API which
-        # only allows retrieving / editing of one preview value. This causes
-        # inconsistency in behavior because cursor.fetchmany() handles no
-        # results differently from cursor.fetchone().
-        return cursor.fetchmany(num_entries)
+    sql = """SELECT price, valid_after FROM prices
+    WHERE stock_id = (?) AND valid_after > NOW()
+    ORDER BY valid_after ASC
+    """
+    # FIXME returning more than one entry is contrary to the HTTP API which
+    # only allows retrieving / editing of one preview value. This causes
+    # inconsistency in behavior because cursor.fetchmany() handles no
+    # results differently from cursor.fetchone().
+    return read_value(db, sql, stock_id, fetch_rows=num_entries)
 
 
 def set_price_preview(db: Connection, stock_id: int, new_value: int):
@@ -63,7 +57,7 @@ def show_stock(db: Connection, stock_id: int):
 
 
 def list_stocks(db: Connection):
-    return read_value(db, """SELECT * FROM stocks""", fetch_num="all")
+    return read_value(db, """SELECT * FROM stocks""", fetch_rows="all")
 
 
 def create_stock(db: Connection, stock_name: str):
