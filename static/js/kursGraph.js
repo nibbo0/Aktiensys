@@ -13,6 +13,7 @@ class KursGraph {
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 animation: false, // Schnellere Updates
                 plugins: {
                     legend: { 
