@@ -2,35 +2,23 @@ from mariadb import Connection
 from mariadb.constants.CURSOR import READ_ONLY
 
 
-from . import exceptions
+from . import exceptions, read_value
 
 
 def get_price_current(db: Connection, stock_id: int):
-    with db.cursor(cursor_type=READ_ONLY) as cursor:
-        # FIXME fix time check by converting to unix timestamp
-        cursor.execute(
-            """SELECT price, valid_after FROM prices
-            WHERE
-                stock_id = (?) AND valid_after <= NOW()
-            ORDER BY valid_after DESC
-            """,
-            (stock_id,)
-        )
-        return cursor.fetchone()
+    sql = """SELECT * FROM prices
+    WHERE stock_id = (?) AND valid_after <= NOW()
+    ORDER BY valid_after DESC
+    """
+    return read_value(db, sql, stock_id, fetch_num=1)
 
 
 def get_price_history(db: Connection, stock_id: int, num_entries: int = 1):
-    with db.cursor(cursor_type=READ_ONLY) as cursor:
-        # FIXME fix time check by converting to unix timestamp
-        cursor.execute(
-            """SELECT price, valid_after FROM prices
-            WHERE
-                stock_id = (?) AND valid_after <= NOW()
-            ORDER BY valid_after DESC
-            """,
-            (stock_id,)
-        )
-        return cursor.fetchmany(num_entries)
+    sql = """SELECT price, valid_after FROM prices
+    WHERE stock_id = (?) AND valid_after <= NOW()
+    ORDER BY valid_after DESC
+    """
+    return read_value(db, sql, stock_id, fetch_num=num_entries)
 
 
 def get_price_preview(db: Connection, stock_id: int, num_entries: int = 1):
@@ -71,18 +59,11 @@ def set_price_preview(db: Connection, stock_id: int, new_value: int):
 
 
 def show_stock(db: Connection, stock_id: int):
-    with db.cursor(cursor_type=READ_ONLY) as cursor:
-        cursor.execute(
-            """SELECT * FROM stocks WHERE id = (?) """,
-            (stock_id,)
-        )
-        return dict(zip(cursor.metadata["field"], cursor.fetchone()))
+    return read_value(db, """SELECT * FROM stocks WHERE id = (?)""", stock_id)
 
 
 def list_stocks(db: Connection):
-    with db.cursor(cursor_type=READ_ONLY) as cursor:
-        cursor.execute("""SELECT id, stock_name FROM stocks""")
-        return cursor.fetchall()
+    return read_value(db, """SELECT * FROM stocks""", fetch_num="all")
 
 
 def create_stock(db: Connection, stock_name: str):

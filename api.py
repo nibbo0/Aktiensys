@@ -92,6 +92,4 @@ def get_stock(stock_id: int):
 @api.route('/aktien/')
 def get_stocks():
     db = get_db()
-    stocks = stock.list_stocks(db)
-    return [{"id": stock_id, "name": stock_name}
-            for stock_id, stock_name in stocks]
+    return stock.list_stocks(db)
