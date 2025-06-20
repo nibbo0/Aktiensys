@@ -102,3 +102,11 @@ def get_stock(stock_id: int):
 def get_stocks():
     db = get_db()
     return stock.list_stocks(db)
+
+
+@api.route('/aktien/<int:stock_id>/name', methods=['PUT'])
+def set_stock_name(stock_id: int):
+    db = get_db()
+    name = request.args.get("name", type=str)
+    stock.rename_stock(db, stock_id, name)
+    return "ok"

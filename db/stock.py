@@ -67,3 +67,16 @@ def create_stock(db: Connection, stock_name: str):
         new_id = cursor.lastrowid
     db.commit()
     return new_id
+
+
+def rename_stock(db: Connection, stock_id: int, new_name: str):
+    with db.cursor() as cursor:
+        cursor.execute(
+            """UPDATE stocks
+            SET stock_name = (?)
+            WHERE id = (?)
+            """,
+            (new_name, stock_id)
+        )
+        db.commit()
+        return cursor.rowcount
