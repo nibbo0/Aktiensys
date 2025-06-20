@@ -1,7 +1,24 @@
 from quart import Quart
+import logging
 
 
 def create_app(config=None):
+    logging_config = {}
+
+    from default_config import LOGGING as DEFAULT_LOGGING_CONFIG
+    logging_config |= DEFAULT_LOGGING_CONFIG
+
+    try:
+        from config import LOGGING as CUSTOM_LOGGING_CONFIG
+        logging_config |= CUSTOM_LOGGING_CONFIG
+    except ImportError:
+        pass
+
+    if config:
+        logging_config |= config.get('LOGGING', {})
+
+    logging.config.dictConfig(logging_config)
+
     app = Quart(__name__, static_folder='static', template_folder='templates')
 
     app.config.from_pyfile('default_config.py')
