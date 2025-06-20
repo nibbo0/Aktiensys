@@ -70,7 +70,25 @@ def set_price_preview(db: Connection, stock_id: int, new_value: int):
         return cursor.rowcount
 
 
+def show_stock(db: Connection, stock_id: int):
+    with db.cursor(cursor_type=READ_ONLY) as cursor:
+        cursor.execute(
+            """SELECT * FROM stocks WHERE id = (?) """,
+            (stock_id,)
+        )
+        return dict(zip(cursor.metadata["field"], cursor.fetchone()))
+
+
 def list_stock(db: Connection):
     with db.cursor(cursor_type=READ_ONLY) as cursor:
         cursor.execute("""SELECT id, stock_name FROM stocks""")
         return cursor.fetchall()
+
+
+def create_stock(db: Connection, stock_name: str):
+    with db.cursor() as cursor:
+        cursor.execute("""INSERT INTO stocks (stock_name) VALUES (?)""",
+                       (stock_name,))
+        new_id = cursor.lastrowid
+    db.commit()
+    return new_id

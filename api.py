@@ -69,3 +69,29 @@ def set_stock_preview(stock_id: int):
     except exceptions.PreviewRetrievalError as e:
         return ApiError.STATE.as_response(e.message)
     return {stock_id: preview}
+
+
+@api.route('/aktien/', methods=['POST'])
+def create_stocks():
+    db = get_db()
+    stock_name = request.args.get("name", type=str)
+    return {"id": stock.create_stock(db, stock_name)}
+
+
+@api.route('/aktien/<int:stock_id>')
+def get_stock(stock_id: int):
+    db = get_db()
+    stocks = stock.show_stock(db, stock_id)
+    if stocks is not None:
+        return stocks
+    else:
+        return ApiError.INPUT.as_response(
+            f"Aktie mit id '{stock_id}' konnte nicht gefunden werden.")
+
+
+@api.route('/aktien/')
+def get_stocks():
+    db = get_db()
+    stocks = stock.list_stock(db)
+    return [{"id": stock_id, "name": stock_name}
+            for stock_id, stock_name in stocks]
