@@ -16,3 +16,7 @@ async def kursansicht():
 @front.route('/settings')
 async def settings():
     return await render_template('settings.html', active='settings')
+
+@front.route('/shop')
+async def shop():
+    return await render_template('shop.html', active='shop')
