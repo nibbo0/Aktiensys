@@ -58,3 +58,14 @@ def get_stock_preview(stock_id: int = None):
     else:
         previews[stock_id] = get_preview(stock_id)
     return previews
+
+
+@api.route('/kurse/vorschau/<int:stock_id>', methods=['PUT'])
+def set_stock_preview(stock_id: int):
+    db = get_db()
+    preview = request.args.get("wert", type=int)
+    try:
+        stock.set_price_preview(db, stock_id, preview)
+    except exceptions.PreviewRetrievalError as e:
+        return ApiError.STATE.as_response(e.message)
+    return {stock_id: preview}

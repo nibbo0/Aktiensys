@@ -2,6 +2,9 @@ from mariadb import Connection
 from mariadb.constants.CURSOR import READ_ONLY
 
 
+from . import exceptions
+
+
 def get_price_current(db: Connection, stock_id: int):
     with db.cursor(cursor_type=READ_ONLY) as cursor:
         # FIXME fix time check by converting to unix timestamp
@@ -46,6 +49,25 @@ def get_price_preview(db: Connection, stock_id: int, num_entries: int = 1):
         # inconsistency in behavior because cursor.fetchmany() handles no
         # results differently from cursor.fetchone().
         return cursor.fetchmany(num_entries)
+
+
+def set_price_preview(db: Connection, stock_id: int, new_value: int):
+    with db.cursor() as cursor:
+        preview = get_price_preview(db, stock_id, num_entries=1)
+        if not preview:
+            raise exceptions.PreviewRetrievalError(
+                "Keine Vorschau zur Aktualisierung vorhanden.")
+        price, timestmp = preview
+        cursor.execute(
+            """UPDATE price FROM prices
+            SET price = (?)
+            WHERE
+                stock_id = (?) AND valid_after = (?)
+            """,
+            (new_value, stock_id, timestmp)
+        )
+        cursor.commit()
+        return cursor.rowcount
 
 
 def list_stock(db: Connection):
