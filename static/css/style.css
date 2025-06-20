@@ -1,9 +1,13 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden; /* Kein Scrollen */
+}
+
 body {
     font-family: Arial, sans-serif;
     background-color: #3f7fa7;
-    margin: 0;
-    padding: 0;
-    min-height: 100vh;
     display: flex;
     flex-direction: column;
 }
@@ -69,7 +73,8 @@ header {
 #headerHomeSVG,
 #headerSettingsSVG,
 #headerRefreshSVG,
-#headerKursansichtSVG {
+#headerKursansichtSVG,
+#headerShopSVG {
     width: 45px;
     height: 45px;
     vertical-align: middle;
@@ -81,14 +86,16 @@ header {
 }
 
 #headerHomeSVG,
-#headerKursansichtSVG {
+#headerKursansichtSVG,
+#headerShopSVG {
     transition: filter 0.1s, transform 0.6s cubic-bezier(.4,2,.6,1);
 }
 
 #headerSettingsSVG:hover,
 #headerHomeSVG:hover,
 #headerRefreshSVG:hover,
-#headerKursansichtSVG:hover {
+#headerKursansichtSVG:hover,
+#headerShopSVG:hover {
     filter: invert(62%) sepia(89%) saturate(749%) hue-rotate(2deg) brightness(104%) contrast(101%);
 }
 
@@ -98,7 +105,8 @@ header {
 }
 
 .headerItem:hover #headerHomeSVG,
-.headerItem:hover #headerKursansichtSVG{
+.headerItem:hover #headerKursansichtSVG,
+.headerItem:hover #headerShopSVG {
     transform: scale(1.2)
 }
 
@@ -141,6 +149,9 @@ footer {
 
 .main-content {
     flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
     margin: 10px 24px 24px 24px;
     background-color: #003e61;
     border-radius: 20px;
@@ -148,11 +159,12 @@ footer {
         0 4px 24px 0 rgba(0,0,0,0.6),
         0 1.5px 8px 0 #00c3ff44;
     padding: 25px;
-    display: flex;
-    flex-direction: column;
     color: #ffffff;
     transition: margin 0.3s;
+    max-height: calc(100vh - 60px - 48px); /* 60px Header, 48px Margin/Padding */
+    overflow: hidden;
 }
+
 
 
 .main-content h1 {
@@ -209,4 +221,119 @@ footer {
 .button-bar button{
     height: 40px;
     width: 165px;
+}
+
+.chart-container {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    max-height: 100%;
+    height: 100%;
+    width: 100%;
+    position: relative;
+}
+
+#kursChart {
+    flex: 1 1 auto;
+    width: 100% !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    min-height: 0 !important;
+    box-sizing: border-box;
+    display: block;
+}
+
+/* shop*/
+
+.shop-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 16px;
+    
+}
+
+.shop-list-header,
+.shop-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 40px 60px 40px 80px 80px;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.shop-list-header {
+    font-weight: bold;
+    color: #ffffff;
+    padding: 8px 0 8px 0;
+    border-bottom: 2px solid #e08b14;
+    margin-bottom: 4px;
+}
+
+.shop-row {
+    background: rgba(255,255,255,0.04);
+    border-radius: 8px;
+    padding: 8px 0;
+    transition: background 0.2s;
+}
+
+.shop-row:hover {
+    background: rgba(224,139,20,0.10);
+}
+
+.shop-row span {
+    font-size: 1.1em;
+    color: #fff;
+}
+
+.anzahl-input {
+    width: 60px;
+    text-align: center;
+    font-size: 1em;
+    border-radius: 4px;
+    border: 1px solid #e08b14;
+    background: #fff;
+    color: #003e61;
+}
+
+.minus-btn, .plus-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 1.3em;
+    border: none;
+    border-radius: 50%;
+    background: #e08b14;
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.minus-btn:hover, .plus-btn:hover {
+    background: #ffb84d;
+    color: #222;
+}
+
+.firma-name {
+ padding-left: 10px;
+}
+
+.kauf-btn, .verkauf-btn {
+    width: 100%;
+    padding: 8px 0;
+    border-radius: 6px;
+    border: none;
+    background: #e08b14;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.kauf-btn:hover, .verkauf-btn:hover {
+    background: #ffb84d;
+    color: #222;
 }

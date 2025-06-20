@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>D(AU)-Jones Index</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+  </head>
+  <body>
+    {% include 'header.html' %}
+    <div class="main-content">
+    <h1>Shop</h1>
+    <div class="shop-list">
+        <div class="shop-list-header">
+            <span>Firmenname</span>
+            <span>Aktueller Kurs</span>
+            <span>Aktien im Umlauf</span>
+            <span></span>
+            <span>Anzahl</span>
+            <span></span>
+            <span>Kaufen</span>
+            <span>Verkaufen</span>
+        </div>
+        <div class="shop-row">
+            <span class="firma-name">Bäckerei</span>
+            <span class="akt-wert">120 MA</span>
+            <span class="aktien-umlauf">500</span>
+            <button class="plus-btn">+</button>
+            <input type="text" class="anzahl-input" value="1" min="1" max="500">
+            <button class="minus-btn">-</button>
+            <button class="kauf-btn">Kaufen</button>
+            <button class="verkauf-btn">Verkaufen</button>
+        </div>
+        <div class="shop-row">
+            <span class="firma-name">Saftbar</span>
+            <span class="akt-wert">99 MA</span>
+            <span class="aktien-umlauf">300</span>
+            <button class="plus-btn">+</button>
+            <input type="text" class="anzahl-input" value="1" min="1" max="300">
+            <button class="minus-btn">-</button>
+            <button class="kauf-btn">Kaufen</button>
+            <button class="verkauf-btn">Verkaufen</button>
+        </div>
+        
+    </div>
+</div>
+    
+    <div id="app"></div>
+  </body>
+</html>
