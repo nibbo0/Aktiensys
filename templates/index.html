@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="/static/css/style.css">
   </head>
   <body>
-    {% include 'header.html' %}
+    {% include 'components/header.html' %}
     <div class="main-content">
       <h1>Firmenübersicht</h1>
       <!-- Buttonleiste-->
@@ -18,17 +18,8 @@
         <button class="btn btn-primary" id="add-company">Firma hinzufügen</button>
         <button class="btn btn-secondary" id="delete-selected">Ausgewählte löschen</button>
        </div>
-      <!-- Kopfzeile -->
-      <div class="firmen-list-header">
-        <span></span>
-        <span>Firmenname</span>
-        <span>Farbe</span>
-        <span>Aktueller Kurs</span>
-        <span>Aktuelles Kursziel</span>
-        <span>Nächstes Kursziel</span>
-        <span>Speichern</span>
-      </div>
-      <!-- Dummy-Einträge -->
+      {% include 'components/firmen_list.html' %}
+      <!-- Dummy-Einträge 
       <div class="firmen-list-row">
         <input type="checkbox">
         <input type="text" id="list-row-input firmName" value="Zeitung" placeholder="Firmenname">
@@ -37,43 +28,8 @@
         <input type="text" id="list-row-input aktKursZiel" value="130 MA" placeholder="Aktuelles Kursziel">
         <input type="number" value="135" step="1.00">
         <button>Save</button>
-      </div>
-      <div class="firmen-list-row">
-        <input type="checkbox">
-        <input type="text" id="list-row-input firmName" value="Bäckerei" placeholder="Firmenname">
-        <input type="color" id="list-row-input firmColor" value="#ff0000" placeholder="Farbe">
-        <input type="text" id="list-row-input aktKurs" value="156 MA" placeholder="Aktueller Kurs">
-        <input type="text" id="list-row-input aktKursZiel" value="188 MA" placeholder="Aktuelles Kursziel">
-        <input type="number" value="" step="1.00">
-        <button>Save</button>
-      </div>
-      <div class="firmen-list-row">
-        <input type="checkbox">
-        <input type="text" id="list-row-input firmName" value="Saftbar" placeholder="Firmenname">
-        <input type="color" id="list-row-input firmColor" value="#ff0000" placeholder="Farbe">
-        <input type="text" id="list-row-input aktKurs" value="99 MA" placeholder="Aktueller Kurs">
-        <input type="text" id="list-row-input aktKursZiel" value="70 MA" placeholder="Aktuelles Kursziel">
-        <input type="number" value="" step="1.00">
-        <button>Save</button>
-      </div>
-      <div class="firmen-list-row">
-        <input type="checkbox">
-        <input type="text" id="list-row-input firmName"  value="Küche" placeholder="Firmenname">
-        <input type="color" id="list-row-input firmColor" value="#ff0000" placeholder="Farbe">
-        <input type="text" id="list-row-input aktKurs" value="20 MA" placeholder="Aktueller Kurs">
-        <input type="text" id="list-row-input aktKursZiel" value="60 MA" placeholder="Aktuelles Kursziel">
-        <input type="number" value="" step="1.00">
-        <button>Save</button>
-      </div>
-      <div class="firmen-list-row">
-        <input type="checkbox">
-        <input type="text" id="list-row-input firmName"  value="Bank" placeholder="Firmenname">
-        <input type="color" id="list-row-input firmColor" value="#ff0000" placeholder="Farbe">
-        <input type="text" id="list-row-input aktKurs" value="20 MA" placeholder="Aktueller Kurs">
-        <input type="text" id="list-row-input aktKursZiel" value="60 MA" placeholder="Aktuelles Kursziel">
-        <input type="number" value="" step="1.00">
-        <button>Save</button>
-      </div>
+      </div>-->
+      
 
 
       <!-- Weitere Dummy-Einträge nach Bedarf -->
