@@ -32,7 +32,7 @@ def create_app(config=None):
     from api import api
     app.register_blueprint(api)
 
-    import db
+    from db import manage as db
     db.init_app(app)
 
     return app

@@ -3,7 +3,8 @@ from functools import partial
 
 from quart import Blueprint, request
 
-from db import exceptions, get_db, stock
+from db import exceptions, stock
+from db.manage import get_db
 
 
 class ApiError(Enum):
