@@ -3,7 +3,7 @@ from functools import partial
 
 from quart import Blueprint, request
 
-from db import get_db, stock, exceptions
+from db import exceptions, get_db, stock
 
 
 class ApiError(Enum):
@@ -87,6 +87,12 @@ def create_stocks():
     return {"id": stock.create_stock(db, stock_name)}
 
 
+@api.route('/aktien/')
+def get_stocks():
+    db = get_db()
+    return stock.list_stocks(db)
+
+
 @api.route('/aktien/<int:stock_id>')
 def get_stock(stock_id: int):
     db = get_db()
@@ -95,12 +101,6 @@ def get_stock(stock_id: int):
         return ApiError.NOT_FOUND.as_response(
             f"Aktie mit id '{stock_id}' konnte nicht gefunden werden.")
     return stocks
-
-
-@api.route('/aktien/')
-def get_stocks():
-    db = get_db()
-    return stock.list_stocks(db)
 
 
 @api.route('/aktien/<int:stock_id>/name', methods=['PUT'])
