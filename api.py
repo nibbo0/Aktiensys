@@ -36,7 +36,7 @@ def get_stock_price(stock_id: int = None):
     history_len = request.args.get("eintraege", default=1, type=int)
     if not history_len > 0:
         return ApiError.INPUT.as_response("'eintraege' muss >0 sein.")
-    get_price = partial(stock.get_price_history, db, num_entries=history_len)
+    get_price = partial(stock.get_price_history, db, fetch_rows=history_len)
     prices = {}
     if stock_id is None:
         for stock_data in stock.list_stocks(db):
@@ -58,8 +58,7 @@ def get_stock_price(stock_id: int = None):
 @api.route('/kurse/vorschau/<int:stock_id>')
 def get_stock_preview(stock_id: int = None):
     db = get_db()
-    preview_len = 1
-    get_preview = partial(stock.get_price_preview, db, num_entries=preview_len)
+    get_preview = partial(stock.get_price_preview, db, fetch_rows="first")
     previews = {}
     if stock_id is None:
         for stock_data in stock.list_stocks(db):

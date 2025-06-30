@@ -1,11 +1,14 @@
+from typing import Literal, Union
+
 import click
 import mariadb
-from quart import current_app, g, cli
+from quart import cli, current_app, g
 
 from .tables import _create_tables, _drop_tables
 
 
-def read_value(connection: mariadb.Connection, sql: str, *data, fetch_rows="first"):
+def read_value(connection: mariadb.Connection, sql: str, *data,
+               fetch_rows: Union[int, Literal["all", "first"]] = "first"):
     """Execute a readonly statment on the connection.
 
     Map the result to a [list of] dictionary with names based on the selected
