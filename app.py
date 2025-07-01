@@ -35,6 +35,9 @@ def create_app(config=None):
     from db import manage as db
     db.init_app(app)
 
+    import market_engine
+    market_engine.init_app(app)
+
     return app
 
 

@@ -1,6 +1,8 @@
+from datetime import datetime
 from typing import Literal, Union
 
 from mariadb import Connection
+from quart import current_app
 
 from . import exceptions, read_value
 
@@ -50,6 +52,20 @@ def set_price_preview(db: Connection, stock_id: int, new_price: int):
             (new_price, stock_id, timestmp)
         )
         db.commit()
+        return cursor.rowcount
+
+
+def add_price_preview(db: Connection, stock_id: int, valid_after: datetime,
+                      price: float):
+    with db.cursor() as cursor:
+        cursor.execute(
+            """INSERT INTO prices (stock_id, valid_after, price)
+            VALUES (?, ?, ?)""",
+            (stock_id, valid_after, price)
+        )
+        db.commit()
+        current_app.logger.info("pushed new preview (%.2f). valid_after: %s %s",
+                                price, valid_after, valid_after.tzname())
         return cursor.rowcount
 
 
