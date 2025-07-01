@@ -34,7 +34,6 @@ tables = {
 
 
 def _drop_tables(db, fail_on_missing=True):
-    cursor = db.cursor()
     drop_stmt = """DROP TABLE {};"""
     check_stmt = """
         SELECT COUNT(*)
@@ -42,33 +41,30 @@ def _drop_tables(db, fail_on_missing=True):
         WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ?
     """
     num_tables = 0
-    try:
-        for table in reversed(tables):
-            if not fail_on_missing:
-                cursor.execute(check_stmt, (table,))
-                if cursor.fetchone()[0] == 0:
-                    continue
-            cursor.execute(drop_stmt.format(table))
+    with db.cursor() as cursor:
+        try:
+            for table in reversed(tables):
+                if not fail_on_missing:
+                    cursor.execute(check_stmt, (table,))
+                    if cursor.fetchone()[0] == 0:
+                        continue
+                cursor.execute(drop_stmt.format(table))
             num_tables += 1
-    except mariadb.Error as e:
-        cursor.close()
-        raise Exception("Error dropping tables.\n"
-                        f"SQL: {cursor.statment}\n"
-                        f"Error: {e}") from e
-    cursor.close()
+        except mariadb.Error as e:
+            raise Exception(
+                f"Error dropping tables.\nSQL: {cursor.statment}\nError: {e}"
+            ) from e
     return num_tables
 
 
 def _create_tables(db):
-    cursor = db.cursor()
     num_tables = 0
-    try:
+    with db.cursor() as cursor:
         for table, sql in tables.items():
-            cursor.execute(sql)
-            num_tables += 1
-    except mariadb.Error as e:
-        cursor.close()
-        raise Exception(f"Error creating table '{table}'.\nSQL: {sql}\n"
-                        f"Error: {e}") from e
-    cursor.close()
+            try:
+                cursor.execute(sql)
+                num_tables += 1
+            except mariadb.Error as e:
+                raise Exception(f"Error creating table '{table}'.\nSQL: {sql}\n"
+                                f"Error: {e}") from e
     return num_tables
