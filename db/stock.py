@@ -77,6 +77,10 @@ def list_stocks(db: Connection):
     return read_value(db, """SELECT * FROM stocks""", fetch_rows="all")
 
 
+def list_stock_ids(db: Connection):
+    return [stock["id"] for stock in list_stocks(db)]
+
+
 def create_stock(db: Connection, stock_name: str):
     with db.cursor() as cursor:
         cursor.execute("""INSERT INTO stocks (stock_name) VALUES (?)""",
