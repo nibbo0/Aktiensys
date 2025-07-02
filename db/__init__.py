@@ -1,4 +1,5 @@
 from typing import Literal, Union
+from datetime import datetime, timezone
 
 import mariadb
 
@@ -20,15 +21,22 @@ def read_value(connection: mariadb.Connection, sql: str, *data,
 
         cursor.execute(sql, data)
 
+        def try_set_timezones(values):
+            return [v.replace(tz=timezone.utc) if isinstance(v, datetime) else v
+                    for v in values]
+
         def map_dict(values):
             return dict(zip(cursor.metadata["field"], values))
+
+        def parse_values(values):
+            return map_dict(try_set_timezones(values))
 
         if fetch_rows == "first":
             value = cursor.fetchone()
             if value is None:
                 return None
-            return map_dict(value)
+            return parse_values(value)
         elif fetch_rows == "all":
-            return [map_dict(v) for v in cursor.fetchall()]
+            return [parse_values(v) for v in cursor.fetchall()]
         else:
-            return [map_dict(v) for v in cursor.fetchmany(fetch_rows)]
+            return [parse_values(v) for v in cursor.fetchmany(fetch_rows)]

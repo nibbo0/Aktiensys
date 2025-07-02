@@ -77,7 +77,7 @@ The top level requirements are:
     2. Create the required MariaDB structure using the provided script. You may
        also edit the script or create the database and a user manually to suit
        your needs. In such cases, take care to also update the appropriate
-       config fields.
+       config fields. Remember to set the timezone for the database to UTC!
 
        ```
        mariadb> source /path/to/dau-jones/create_db.sql;

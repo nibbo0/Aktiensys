@@ -3,7 +3,7 @@ import random
 import traceback
 from abc import ABC, abstractmethod
 from collections.abc import Callable
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Self, Union
 
 import mariadb
@@ -173,18 +173,18 @@ class BaseMarketEngine(ABC):
             self, when: datetime, callback: Callable
     ) -> asyncio.TimerHandle:
         # http://stackoverflow.com/questions/55592067/ddg#55593284
-        return self._schedule(when - datetime.utcnow(), callback)
+        return self._schedule(when - datetime.now(timezone.utc), callback)
 
     def start(self, when: Union[float, None] = None):
         """Start the engine.
 
         Generate and apply prices every `self.interval`. If `when` is None,
-        start the engine at `utcnow() + 1`.
+        start the engine at `now(utc) + 1`.
         """
         if self._timers:
             raise RuntimeError("Engine is already running")
         if when is None:
-            when = datetime.utcnow() + timedelta(seconds=1)
+            when = datetime.now(timezone.utc) + timedelta(seconds=1)
         current_app.logger.debug(f"starting engine at {when}")
         self._schedule_at_utc(when, self._run)
 
@@ -203,7 +203,7 @@ class BaseMarketEngine(ABC):
             current_app.logger.info("updated stocks; scheduling next run in %dmin %ds",
                                     self.interval.total_seconds() // 60,
                                     self.interval.total_seconds() % 60)
-            next_run = datetime.utcnow() + self.interval
+            next_run = datetime.now(timezone.utc) + self.interval
             self._schedule_at_utc(next_run, self._run)
             current_app.logger.info("scheduled next run at %s", next_run)
         except Exception:
@@ -221,11 +221,11 @@ class BaseMarketEngine(ABC):
         """Generate a new price preview for `stock` and push it.
 
         Default behavior is to call `self._generate_price`, set the validity to
-        `utcnow() + self.interval` and push via `stock.push_value`.
+        `now(utc) + self.interval` and push via `stock.push_value`.
         """
         current_app.logger.debug("updating stock %d", stock.stock_id)
         new_price = self._generate_price(stock, context)
-        new_valid = datetime.utcnow() + self.interval
+        new_valid = datetime.now(timezone.utc) + self.interval
         stock.push_value(new_price, new_valid)
 
     @abstractmethod
