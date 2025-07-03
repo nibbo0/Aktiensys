@@ -74,6 +74,7 @@ class MarketEngineDBStock(MarketEngineStock):
     """
     previews: list[tuple[float, datetime]]
     history:  list[tuple[float, datetime]]
+    HISTORY_LEN: int = 40
 
     def __init__(self, stock_id):
         super().__init__(stock_id)
@@ -93,10 +94,10 @@ class MarketEngineDBStock(MarketEngineStock):
     def refresh(self):
         try:
             previews = stock_db.get_price_preview(
-                self._safe_get_db(), self.stock_id, fetch_rows="all"
+                self._safe_get_db(), self.stock_id, fetch_rows=self.HISTORY_LEN
             )
             history = stock_db.get_price_history(
-                self._safe_get_db(), self.stock_id, fetch_rows="all"
+                self._safe_get_db(), self.stock_id, fetch_rows=self.HISTORY_LEN
             )
             self.previews = [v.values() for v in previews]
             self.history = [v.values() for v in history]
