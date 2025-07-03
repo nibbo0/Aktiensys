@@ -29,7 +29,6 @@ def init_app(app: Quart):
         engine.reload_stocks(get_db())
 
         app.config["MARKET_ENGINE"] = engine
-        engine.start()
 
 
 class MarketEngineStock(ABC):
@@ -115,10 +114,12 @@ class MarketEngineDBStock(MarketEngineStock):
             ) from e
 
 
+# FIXME not thread-safe!
 class BaseMarketEngine(ABC):
     _app: Quart
     _loop: asyncio.BaseEventLoop
     _timers: dict[Callable, asyncio.TimerHandle]
+    # FIXME thread-safety!
     interval: float
     _stocks: list[MarketEngineStock]
 
@@ -147,6 +148,7 @@ class BaseMarketEngine(ABC):
         self.interval = interval
         self._stocks = []
 
+    # FIXME thread-safety!
     def reload_stocks(self, db: mariadb.Connection):
         self._stocks = MarketEngineDBStock.all_from_db(db)
         num_loaded = len(self._stocks)
@@ -167,7 +169,7 @@ class BaseMarketEngine(ABC):
             delay = delay.total_seconds()
         # TODO warn about inaccuracies if delay is GT some margin (e.g. 12h)
         callback = self._wrap_scheduled(callback)
-        timer = asyncio.get_running_loop().call_later(
+        timer = self._loop.call_later(
             delay, callback
         )
         self._timers[callback] = timer
@@ -179,6 +181,9 @@ class BaseMarketEngine(ABC):
         # http://stackoverflow.com/questions/55592067/ddg#55593284
         return self._schedule(when - datetime.now(timezone.utc), callback)
 
+    def is_running(self):
+        return len(self._timers) > 0
+
     def start(self, when: Union[float, None] = None):
         """Start the engine.
 
@@ -189,12 +194,20 @@ class BaseMarketEngine(ABC):
             raise RuntimeError("Engine is already running")
         if when is None:
             when = datetime.now(timezone.utc) + timedelta(seconds=1)
-        current_app.logger.debug(f"starting engine at {when}")
+        current_app.logger.debug(f"starting engine at {when}.")
         self._schedule_at_utc(when, self._run)
+
+    def threadsafe_start(self, *args):
+        self._loop.call_soon_threadsafe(self.start, *args)
 
     def stop(self):
         for timer in self._timers.values():
             timer.cancel()
+        self._timers = {}
+        current_app.logger.debug("stopped engine.")
+
+    def threadsafe_stop(self, *args):
+        self._loop.call_soon_threadsafe(self.stop, *args)
 
     def _run(self):
         """Recursively update price previews."""

@@ -1,7 +1,7 @@
 from enum import Enum
 from functools import partial
 
-from quart import Blueprint, request
+from quart import Blueprint, request, current_app, jsonify
 
 from db import exceptions, stock
 from db.manage import get_db
@@ -110,3 +110,26 @@ def set_stock_name(stock_id: int):
     name = request.args.get("name", type=str)
     stock.rename_stock(db, stock_id, name)
     return "ok"
+
+
+@api.route('/markt/update')
+def reload_market_engine():
+    num_loaded = current_app.config["MARKET_ENGINE"].reload_stocks(get_db())
+    return str(num_loaded), 200
+
+
+@api.route('/markt/status')
+def get_market_engine_status():
+    return jsonify(current_app.config["MARKET_ENGINE"].is_running())
+
+
+@api.route('/markt/start')
+def start_market_engine():
+    current_app.config["MARKET_ENGINE"].threadsafe_start()
+    return ('', 200)
+
+
+@api.route('/markt/stop')
+def stop_market_engine():
+    current_app.config["MARKET_ENGINE"].threadsafe_stop()
+    return ('', 200)

@@ -38,6 +38,8 @@ def create_app(config=None):
     import market_engine
     market_engine.init_app(app)
 
+    app.logger.info("Created app.")
+
     return app
 
 
