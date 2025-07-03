@@ -2,6 +2,7 @@ from enum import Enum
 from functools import partial
 
 from quart import Blueprint, request, current_app, jsonify
+import mariadb
 
 from db import exceptions, stock
 from db.manage import get_db
@@ -11,12 +12,20 @@ class ApiError(Enum):
     INPUT = 'invalid-input'
     STATE = 'invalid-state'
     NOT_FOUND = 'not-found'
+    DATABASE = 'database'
+    UNKNOWN = 'unknown-err'
 
     def http_code(self) -> int:
         match self:
             case self.INPUT:
                 return 400
             case self.STATE:
+                return 500
+            case self.NOT_FOUND:
+                return 404
+            case self.DATABASE:
+                return 500
+            case self.UNKNOWN:
                 return 500
 
     def as_response(self, msg: str = None) -> tuple[dict, int]:
@@ -85,7 +94,12 @@ def set_stock_preview(stock_id: int):
 def create_stocks():
     db = get_db()
     stock_name = request.args.get("name", type=str)
-    return {"id": stock.create_stock(db, stock_name)}
+    try:
+        return {"id": stock.create_stock(db, stock_name)}
+    except mariadb.IntegrityError as e:
+        return ApiError.DATABASE.as_response(
+            f"Database operation failed with error: `{e}`"
+        )
 
 
 @api.route('/aktien/')
@@ -108,7 +122,12 @@ def get_stock(stock_id: int):
 def set_stock_name(stock_id: int):
     db = get_db()
     name = request.args.get("name", type=str)
-    stock.rename_stock(db, stock_id, name)
+    try:
+        stock.rename_stock(db, stock_id, name)
+    except mariadb.IntegrityError as e:
+        return ApiError.DATABASE.as_response(
+            f"Database operation failed with error: `{e}`"
+        )
     return "ok"
 
 
