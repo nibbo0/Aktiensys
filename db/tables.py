@@ -13,7 +13,7 @@ tables = {
     "prices": """
         CREATE TABLE prices (
             stock_id INT NOT NULL,
-            valid_after TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            valid_after DATETIME DEFAULT CURRENT_TIMESTAMP,
             price DECIMAL(65,2) NOT NULL,
             FOREIGN KEY (stock_id) REFERENCES stocks(id),
             PRIMARY KEY (stock_id, valid_after)

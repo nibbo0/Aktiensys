@@ -9,7 +9,7 @@ from . import exceptions, read_value
 
 def get_price_current(db: Connection, stock_id: int):
     sql = """SELECT * FROM prices
-    WHERE stock_id = (?) AND valid_after <= NOW()
+    WHERE stock_id = (?) AND valid_after <= UTC_TIMESTAMP()
     ORDER BY valid_after DESC
     """
     return read_value(db, sql, stock_id, fetch_rows="first")
@@ -18,7 +18,7 @@ def get_price_current(db: Connection, stock_id: int):
 def get_price_history(db: Connection, stock_id: int,
                       fetch_rows: Union[int, Literal["all", "first"]] = 1):
     sql = """SELECT * FROM prices
-    WHERE stock_id = (?) AND valid_after <= NOW()
+    WHERE stock_id = (?) AND valid_after <= UTC_TIMESTAMP()
     ORDER BY valid_after DESC
     """
     return read_value(db, sql, stock_id, fetch_rows=fetch_rows)
@@ -27,7 +27,7 @@ def get_price_history(db: Connection, stock_id: int,
 def get_price_preview(db: Connection, stock_id: int,
                       fetch_rows: Union[int, Literal["all", "first"]] = 1):
     sql = """SELECT price, valid_after FROM prices
-    WHERE stock_id = (?) AND valid_after > NOW()
+    WHERE stock_id = (?) AND valid_after > UTC_TIMESTAMP()
     ORDER BY valid_after ASC
     """
     # FIXME returning more than one entry is contrary to the HTTP API which
