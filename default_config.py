@@ -48,6 +48,5 @@ from datetime import timedelta
 MARKET_ENGINE_CLASS = RandomMarketEngine
 MARKET_ENGINE_PARAMS = {
     "interval": timedelta(minutes=15),
-    "interval": timedelta(seconds=15),
     "price_range": range(1, 10),
 }
