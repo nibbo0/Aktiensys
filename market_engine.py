@@ -26,10 +26,7 @@ def init_app(app: Quart):
         engine_params = app.config["MARKET_ENGINE_PARAMS"]
 
         engine = engine_class(app, **engine_params)
-
-        engine_stocks = MarketEngineDBStock.all_from_db(get_db())
-        engine.stocks = engine_stocks
-        app.logger.info(f"loaded {len(engine_stocks)} stocks from db")
+        engine.reload_stocks(get_db())
 
         app.config["MARKET_ENGINE"] = engine
         engine.start()
@@ -123,7 +120,7 @@ class BaseMarketEngine(ABC):
     _loop: asyncio.BaseEventLoop
     _timers: dict[Callable, asyncio.TimerHandle]
     interval: float
-    stocks: list[MarketEngineStock]
+    _stocks: list[MarketEngineStock]
 
     # TODO define update function (or listeners) from caller?
     # TODO define overridable get_next_interval function?
@@ -148,7 +145,13 @@ class BaseMarketEngine(ABC):
         self._loop = asyncio.get_running_loop()
         self._timers: dict[Callable, asyncio.TimerHandle] = {}
         self.interval = interval
-        self.stocks = []
+        self._stocks = []
+
+    def reload_stocks(self, db: mariadb.Connection):
+        self._stocks = MarketEngineDBStock.all_from_db(db)
+        num_loaded = len(self._stocks)
+        current_app.logger.info(f"loaded {num_loaded} stocks from db")
+        return num_loaded
 
     def _wrap_scheduled(self, callback: Callable, *args, **kwargs):
         def _scheduled_inner():
@@ -213,7 +216,7 @@ class BaseMarketEngine(ABC):
     def _update_stocks(self, context):
         """Update all the stocks managed by this instance."""
         try:
-            for stock in self.stocks:
+            for stock in self._stocks:
                 self._update_stock(stock, context)
         except Exception as e:
             raise RuntimeError("Error occured while updating stocks") from e
