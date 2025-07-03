@@ -22,14 +22,16 @@ def read_value(connection: mariadb.Connection, sql: str, *data,
         cursor.execute(sql, data)
 
         def try_set_timezones(values):
-            return [v.replace(tz=timezone.utc) if isinstance(v, datetime) else v
-                    for v in values]
+            for i in range(len(values)):
+                if values[i] and isinstance(values[i], datetime):
+                    values[i] = values[i].replace(tzinfo=timezone.utc)
+            return values
 
         def map_dict(values):
             return dict(zip(cursor.metadata["field"], values))
 
         def parse_values(values):
-            return map_dict(try_set_timezones(values))
+            return map_dict(try_set_timezones(list(values)))
 
         if fetch_rows == "first":
             value = cursor.fetchone()
