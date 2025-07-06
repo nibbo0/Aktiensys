@@ -1,8 +1,9 @@
 from enum import Enum
 from functools import partial
+from traceback import format_exception
 
-from quart import Blueprint, request, current_app, jsonify
 import mariadb
+from quart import Blueprint, current_app, jsonify, request
 
 from db import exceptions, stock
 from db.manage import get_db
@@ -38,6 +39,30 @@ class ApiError(Enum):
 api = Blueprint('api', __name__, url_prefix="/api")
 
 
+@api.errorhandler(exceptions.DatabaseError)
+def handle_db_error(error):
+    if isinstance(error, exceptions.StockIdError):
+        return ApiError.NOT_FOUND.as_response(
+            f"Aktie konnte nicht gefunden werden: {error}"
+        )
+    if isinstance(error, exceptions.RowNotFoundError):
+        return ApiError.STATE.as_response(
+            f"Wert konnte nicht gefunden werden: {error}"
+        )
+    if isinstance(error, exceptions.DBValueError):
+        return ApiError.INPUT.as_response(f"unzulässiger Wert: {error}")
+    else:
+        return ApiError.UNKNOWN.as_response()
+
+
+@api.errorhandler(mariadb.Error)
+def handle_mariadb_error(error):
+    current_app.logger.error("".join(format_exception(error)))
+    return ApiError.DATABASE.as_response(
+        error.__class__.__name__ + ": " + str(error)
+    )
+
+
 @api.route('/kurse/verlauf/', defaults={'stock_id': None})
 @api.route('/kurse/verlauf/<int:stock_id>')
 def get_stock_price(stock_id: int = None):
@@ -45,7 +70,8 @@ def get_stock_price(stock_id: int = None):
     db = get_db()
     history_len = request.args.get("eintraege", default=1, type=int)
     if not history_len > 0:
-        return ApiError.INPUT.as_response("'eintraege' muss >0 sein.")
+        return ApiError.INPUT.as_response(
+            "mindestens ein Eintrag muss abgerufen werden.")
     get_price = partial(stock.get_price_history, db, fetch_rows=history_len)
     prices = {}
     if stock_id is None:
@@ -55,11 +81,6 @@ def get_stock_price(stock_id: int = None):
     else:
         # FIXME this should be handled in a separate function
         price = get_price(stock_id)
-        if price is None:
-            # FIXME this arm is never visited because even a nonexistent stock
-            # just returns an empty list
-            return ApiError.NOT_FOUND.as_response(
-                f"Aktie mit id '{stock_id}' konnte nicht gefunden werden.")
         prices[stock_id] = price
     return prices
 
@@ -83,23 +104,16 @@ def get_stock_preview(stock_id: int = None):
 def set_stock_preview(stock_id: int):
     db = get_db()
     preview = request.args.get("wert", type=int)
-    try:
-        stock.set_price_preview(db, stock_id, preview)
-    except exceptions.PreviewRetrievalError as e:
-        return ApiError.STATE.as_response(e.message)
-    return {stock_id: preview}
+    if preview is None:
+        return ApiError.INPUT.as_response("Parameter 'wert' muss ganzzahlig sein.")
+    return stock.set_price_preview(db, stock_id, preview)
 
 
 @api.route('/aktien/', methods=['POST'])
 def create_stocks():
     db = get_db()
     stock_name = request.args.get("name", type=str)
-    try:
-        return {"id": stock.create_stock(db, stock_name)}
-    except mariadb.IntegrityError as e:
-        return ApiError.DATABASE.as_response(
-            f"Database operation failed with error: `{e}`"
-        )
+    return {"id": stock.create_stock(db, stock_name)}
 
 
 @api.route('/aktien/')
@@ -111,23 +125,14 @@ def get_stocks():
 @api.route('/aktien/<int:stock_id>')
 def get_stock(stock_id: int):
     db = get_db()
-    stocks = stock.show_stock(db, stock_id)
-    if stocks is None:
-        return ApiError.NOT_FOUND.as_response(
-            f"Aktie mit id '{stock_id}' konnte nicht gefunden werden.")
-    return stocks
+    return stock.show_stock(db, stock_id)
 
 
 @api.route('/aktien/<int:stock_id>/name', methods=['PUT'])
 def set_stock_name(stock_id: int):
     db = get_db()
     name = request.args.get("name", type=str)
-    try:
-        stock.rename_stock(db, stock_id, name)
-    except mariadb.IntegrityError as e:
-        return ApiError.DATABASE.as_response(
-            f"Database operation failed with error: `{e}`"
-        )
+    stock.rename_stock(db, stock_id, name)
     return "ok"
 
 
