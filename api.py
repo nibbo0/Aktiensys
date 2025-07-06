@@ -13,6 +13,7 @@ class ApiError(Enum):
     INPUT = 'invalid-input'
     STATE = 'invalid-state'
     NOT_FOUND = 'not-found'
+    EMPTY = 'results-empty'
     DATABASE = 'database'
     UNKNOWN = 'unknown-err'
 
@@ -23,6 +24,8 @@ class ApiError(Enum):
             case self.STATE:
                 return 500
             case self.NOT_FOUND:
+                return 404
+            case self.EMPTY:
                 return 404
             case self.DATABASE:
                 return 500
@@ -46,7 +49,7 @@ def handle_db_error(error):
             f"Aktie konnte nicht gefunden werden: {error}"
         )
     if isinstance(error, exceptions.RowNotFoundError):
-        return ApiError.STATE.as_response(
+        return ApiError.NOT_FOUND.as_response(
             f"Wert konnte nicht gefunden werden: {error}"
         )
     if isinstance(error, exceptions.DBValueError):
@@ -89,7 +92,10 @@ def get_stock_price(stock_id: int = None):
             prices[stock_id] = get_price(stock_id)
         return prices
     else:
-        return get_price(stock_id)
+        price = get_price(stock_id)
+        if price is None:
+            return ApiError.EMPTY.as_response("kein Verlauf verfügbar")
+        return price
 
 
 @api.route('/kurse/vorschau/', defaults={'stock_id': None})
@@ -103,7 +109,10 @@ def get_stock_preview(stock_id: int = None):
             previews[stock_id] = get_preview(stock_id)
         return previews
     else:
-        return get_preview(stock_id)
+        preview = get_preview(stock_id)
+        if preview is None:
+            return ApiError.EMPTY.as_response("keine Vorschau verfügbar")
+        return preview
 
 
 @api.route('/kurse/vorschau/<int:stock_id>', methods=['PUT'])
