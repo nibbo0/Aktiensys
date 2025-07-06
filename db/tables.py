@@ -50,7 +50,7 @@ def _drop_tables(db, fail_on_missing=True):
                     if cursor.fetchone()[0] == 0:
                         continue
                 cursor.execute(drop_stmt.format(table))
-            num_tables += 1
+                num_tables += 1
         except mariadb.Error as e:
             raise Exception(
                 f"Error dropping tables.\nSQL: {cursor.statment}\nError: {e}"
