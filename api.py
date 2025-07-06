@@ -143,6 +143,14 @@ def set_stock_name(stock_id: int):
     return stock.rename_stock(db, stock_id, name)
 
 
+@api.route('/aktien/<int:stock_id>/farbe', methods=['PUT'])
+@return_rowcount
+def set_stock_color(stock_id: int):
+    db = get_db()
+    name = request.args.get("farbe", type=str)
+    return stock.recolor_stock(db, stock_id, name)
+
+
 @api.route('/markt/update')
 def reload_market_engine():
     num_loaded = current_app.config["MARKET_ENGINE"].reload_stocks(get_db())

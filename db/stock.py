@@ -3,6 +3,7 @@ from typing import Literal, Union
 
 from mariadb import Connection
 from quart import current_app
+from string import hexdigits
 
 from . import read_value, exceptions
 
@@ -98,12 +99,14 @@ def list_stock_ids(db: Connection):
     return [stock["id"] for stock in list_stocks(db)]
 
 
-def create_stock(db: Connection, stock_name: str):
-    if stock_name is None:
-        raise exceptions.DBValueError("stock_name", None)
+def create_stock(db: Connection, name: str, color: str = None):
+    if name is None:
+        raise exceptions.DBValueError("name", None)
+    if color is not None and not _is_hexcolor(color):
+        raise exceptions.DBValueError("color", color)
     with db.cursor() as cursor:
-        cursor.execute("""INSERT INTO stocks (stock_name) VALUES (?)""",
-                       (stock_name,))
+        cursor.execute("""INSERT INTO stocks (name, color) VALUES (?, ?)""",
+                       (name, color))
         new_id = cursor.lastrowid
     db.commit()
     return new_id
@@ -111,15 +114,41 @@ def create_stock(db: Connection, stock_name: str):
 
 def rename_stock(db: Connection, stock_id: int, new_name: str):
     if new_name is None:
-        raise exceptions.DBValueError("stock_name", None)
+        raise exceptions.DBValueError("name", None)
     _ensure_stock(db, stock_id)
     with db.cursor() as cursor:
         cursor.execute(
             """UPDATE stocks
-            SET stock_name = (?)
+            SET name = (?)
             WHERE id = (?)
             """,
             (new_name, stock_id)
+        )
+        db.commit()
+        return cursor.rowcount
+
+
+def _is_hexcolor(s: str):
+    [prefix, code] = s[:1], s[1:]
+    if prefix != "#":
+        return False
+    if len(code) < 3 or len(code) > 6:
+        return False
+    return all([c in hexdigits for c in code])
+
+
+def recolor_stock(db: Connection, stock_id: int, new_color: str):
+    # ensure that color is either None or a valid hex color
+    if new_color is not None and not _is_hexcolor(new_color):
+        raise exceptions.DBValueError("color", new_color)
+    _ensure_stock(db, stock_id)
+    with db.cursor() as cursor:
+        cursor.execute(
+            """UPDATE stocks
+            SET color = (?)
+            WHERE id = (?)
+            """,
+            (new_color.upper(), stock_id)
         )
         db.commit()
         return cursor.rowcount
