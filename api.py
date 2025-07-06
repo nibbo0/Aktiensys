@@ -1,5 +1,5 @@
 from enum import Enum
-from functools import partial
+from functools import partial, wraps
 from traceback import format_exception
 
 import mariadb
@@ -63,26 +63,33 @@ def handle_mariadb_error(error):
     )
 
 
+def return_rowcount(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        value = f(*args, **kwargs)
+        if isinstance(value, int):
+            return jsonify({"rowcount": value})
+        return value
+    return wrapper
+
+
 @api.route('/kurse/verlauf/', defaults={'stock_id': None})
 @api.route('/kurse/verlauf/<int:stock_id>')
 def get_stock_price(stock_id: int = None):
     # get the stock price history (or preview).
     db = get_db()
-    history_len = request.args.get("eintraege", default=1, type=int)
+    history_len = request.args.get("eintraege", default=10, type=int)
     if not history_len > 0:
         return ApiError.INPUT.as_response(
             "mindestens ein Eintrag muss abgerufen werden.")
     get_price = partial(stock.get_price_history, db, fetch_rows=history_len)
-    prices = {}
     if stock_id is None:
-        for stock_data in stock.list_stocks(db):
-            stock_id = stock_data["id"]
+        prices = {}
+        for stock_id in stock.list_stock_ids(db):
             prices[stock_id] = get_price(stock_id)
+        return prices
     else:
-        # FIXME this should be handled in a separate function
-        price = get_price(stock_id)
-        prices[stock_id] = price
-    return prices
+        return get_price(stock_id)
 
 
 @api.route('/kurse/vorschau/', defaults={'stock_id': None})
@@ -90,17 +97,17 @@ def get_stock_price(stock_id: int = None):
 def get_stock_preview(stock_id: int = None):
     db = get_db()
     get_preview = partial(stock.get_price_preview, db, fetch_rows="first")
-    previews = {}
     if stock_id is None:
-        for stock_data in stock.list_stocks(db):
-            stock_id = stock_data["id"]
+        previews = {}
+        for stock_id in stock.list_stock_ids(db):
             previews[stock_id] = get_preview(stock_id)
+        return previews
     else:
-        previews[stock_id] = get_preview(stock_id)
-    return previews
+        return get_preview(stock_id)
 
 
 @api.route('/kurse/vorschau/<int:stock_id>', methods=['PUT'])
+@return_rowcount
 def set_stock_preview(stock_id: int):
     db = get_db()
     preview = request.args.get("wert", type=int)
@@ -129,22 +136,23 @@ def get_stock(stock_id: int):
 
 
 @api.route('/aktien/<int:stock_id>/name', methods=['PUT'])
+@return_rowcount
 def set_stock_name(stock_id: int):
     db = get_db()
     name = request.args.get("name", type=str)
-    stock.rename_stock(db, stock_id, name)
-    return "ok"
+    return stock.rename_stock(db, stock_id, name)
 
 
 @api.route('/markt/update')
 def reload_market_engine():
     num_loaded = current_app.config["MARKET_ENGINE"].reload_stocks(get_db())
-    return str(num_loaded), 200
+    return jsonify({"num_loaded": num_loaded})
 
 
 @api.route('/markt/status')
 def get_market_engine_status():
-    return jsonify(current_app.config["MARKET_ENGINE"].is_running())
+    is_running = current_app.config["MARKET_ENGINE"].is_running()
+    return jsonify({"is_running": is_running})
 
 
 @api.route('/markt/start')
