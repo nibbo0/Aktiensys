@@ -52,10 +52,10 @@ def set_price_preview(db: Connection, stock_id: int, new_price: Union[int, float
         raise exceptions.DBValueError("price", new_price)
     _ensure_stock(db, stock_id)
     with db.cursor() as cursor:
-        preview = get_price_preview(db, stock_id, fetch_rows=1)
+        preview = get_price_preview(db, stock_id, fetch_rows="first")
         if not preview:
             raise exceptions.RowNotFoundError()
-        price, timestmp = preview
+        timestmp = preview["valid_after"]
         cursor.execute(
             """UPDATE prices
             SET price = (?)
