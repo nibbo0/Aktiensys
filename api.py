@@ -128,7 +128,7 @@ def set_stock_preview(stock_id: int):
 @api.route('/aktien/', methods=['POST'])
 def create_stocks():
     db = get_db()
-    stock_name = request.args.get("name", type=str)
+    stock_name = request.args.get("name", type=str).strip()
     return {"id": stock.create_stock(db, stock_name)}
 
 
@@ -148,7 +148,7 @@ def get_stock(stock_id: int):
 @return_rowcount
 def set_stock_name(stock_id: int):
     db = get_db()
-    name = request.args.get("name", type=str)
+    name = request.args.get("name", type=str).strip()
     return stock.rename_stock(db, stock_id, name)
 
 
