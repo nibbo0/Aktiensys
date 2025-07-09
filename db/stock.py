@@ -14,6 +14,15 @@ def _ensure_stock(db: Connection, stock_id: int):
         raise exceptions.StockIdError(stock_id)
 
 
+def get_prices(db: Connection, stock_id: int,
+               fetch_rows: Union[int, Literal["all", "first"]] = 1):
+    sql = """SELECT * FROM prices
+    WHERE stock_id = (?)
+    ORDER BY valid_after DESC"""
+    _ensure_stock(db, stock_id)
+    return read_value(db, sql, stock_id, fetch_rows=fetch_rows)
+
+
 def get_price_current(db: Connection, stock_id: int):
     sql = """SELECT * FROM prices
     WHERE stock_id = (?) AND valid_after <= UTC_TIMESTAMP()

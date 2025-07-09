@@ -34,10 +34,12 @@ def init_app(app: Quart):
 class MarketEngineStock(ABC):
     stock_id: int
     on_push_listeners: set[Callable]
+    prices: list[tuple[float, datetime]]
 
     def __init__(self, stock_id):
         self.stock_id = stock_id
         self.on_push_listeners = set()
+        self.prices = []
 
     def __eq__(self, o):
         if isinstance(o, self.__class__):
@@ -60,6 +62,9 @@ class MarketEngineStock(ABC):
         for listener in self.on_push_listeners:
             listener(self, new_price, new_valid)
 
+    def get_latest_price(self):
+        return sorted(_stock.prices, key=lambda p: p[1], reverse=True)[0]
+
 
 class MarketEngineDBStock(MarketEngineStock):
     """An interface to interact with stocks from the market engine.
@@ -68,14 +73,12 @@ class MarketEngineDBStock(MarketEngineStock):
     pushes of new values. Tracks the most recently pushed preview. TODO It may
     be beneficial to track the preview furthest in the future.
     """
-    previews: list[tuple[float, datetime]]
-    history:  list[tuple[float, datetime]]
+    prices: list[tuple[float, datetime]]
     HISTORY_LEN: int = 40
 
     def __init__(self, stock_id):
         super().__init__(stock_id)
-        self.previews = []
-        self.history = []
+        self.prices = []
 
         self.refresh()
 
@@ -89,14 +92,10 @@ class MarketEngineDBStock(MarketEngineStock):
 
     def refresh(self):
         try:
-            previews = stock_db.get_price_preview(
+            prices = stock_db.get_prices(
                 self._safe_get_db(), self.stock_id, fetch_rows=self.HISTORY_LEN
             )
-            history = stock_db.get_price_history(
-                self._safe_get_db(), self.stock_id, fetch_rows=self.HISTORY_LEN
-            )
-            self.previews = [v.values() for v in previews]
-            self.history = [v.values() for v in history]
+            self.prices = [v.values() for v in prices]
         except Exception as e:
             raise RuntimeError(
                 f"Unable to refresh stock {self.stock_id} from database"
@@ -255,5 +254,18 @@ class RandomMarketEngine(BaseMarketEngine):
         super().__init__(app, interval)
         self.price_range = price_range
 
-    def _generate_price(self, _stock, _context) -> float:
+    def _generate_price(self, _stock, _context) -> int:
         return random.choice(self.price_range)
+
+
+class RandomChangeMarketEngine(BaseMarketEngine):
+    def __init__(self, app, interval, max_change: int, min_value: int, step: float = 1):
+        super().__init__(app, interval)
+        self.max_change = max_change
+        self.min_value = min_value
+        self.step = step
+
+    def _generate_price(self, _stock: MarketEngineStock, _context) -> int:
+        max_price = _stock.get_latest_price() + self.max_change
+        min_price = max(self.min_value, _stock.get_latest_price() - self.max_change)
+        return random.randrange(min_price, max_price, self.step)
