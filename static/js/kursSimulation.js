@@ -38,26 +38,39 @@ function getKursAenderung(aktuellerKurs, volatility) {
 function aktualisiereKurse() {
     console.log("=== Neue Kurse ===");
 
-    for (let firma in firmen) {
-        firmen[firma].kurs = getKursAenderung(firmen[firma].kurs, firmen[firma].volatility);
-        firmen[firma].verlauf.push(firmen[firma].kurs);
-        
-        if (firmen[firma].verlauf.length > 20) {
-            firmen[firma].verlauf.shift();
-        }
-        
-        console.log(`${firmen[firma].name}: ${firmen[firma].kurs} MA`);
-    }
+    let date = Date.now();
 
-    // Prüfe ob Graph verfügbar ist
+    let updates = [];
+
+    Object.values(firmen).map((firma, index) => {
+        updates[index] = {
+            x: date,
+            y: getKursAenderung(firma.kurs, firma.volatility)
+        };
+        firma.kurs = updates[index].y;
+        firma.verlauf.push(updates[index]);
+
+        console.log(`${firma.name}: ${firma.kurs} MA`);
+    });
+
     if (window.kursGraph) {
-        window.kursGraph.updateData(firmen);
+        window.kursGraph.updateData(
+            updates.map(u => ({ data: [u] }))
+        );
     }
 }
 
 // Warte bis DOM geladen ist
 document.addEventListener('DOMContentLoaded', () => {
     console.log("Kurssimulation startet...");
+    // graphen setzen
+    window.kursGraph.chart.updateSeries(
+        Object.values(firmen).map(firma => ({
+            name: firma.name,
+            data: firma.verlauf,
+            color: firmen.color,
+        }))
+    );
     aktualisiereKurse();
-    setInterval(aktualisiereKurse, 5000);
+    console.log("Timer: " + setInterval(aktualisiereKurse, 10000));
 });

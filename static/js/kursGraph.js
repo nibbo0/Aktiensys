@@ -1,62 +1,75 @@
 class KursGraph {
-    constructor() {
-        this.ctx = document.getElementById('kursChart').getContext('2d');
-        this.chart = this.initChart();
+    constructor(initSeries) {
+        this.container = document.getElementById("chart-container");
+        this.chart = this.initChart(initSeries);
     }
 
-    initChart() {
-        return new Chart(this.ctx, {
-            type: 'line',
-            data: {
-                labels: [],
-                datasets: []
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                animation: false, // Schnellere Updates
-                plugins: {
-                    legend: { 
-                        position: 'top',
-                        labels: { color: '#fff' }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: false,
-                        grid: {
-                            color: 'rgba(255,255,255,0.1)'
-                        },
-                        ticks: { color: '#fff' }
+    initChart(initSeries) {
+        let chart = new ApexCharts(this.container, {
+            chart: {
+                type: 'line',
+                height: '100%',
+                animations: {
+                    enabled: true,
+                    easing: 'linear',
+                    speed: 1000,
+                    animateGradually: {
+                        enabled: true,
                     },
-                    x: {
-                        grid: {
-                            color: 'rgba(255,255,255,0.1)'
-                        },
-                        ticks: { color: '#fff' }
-                    }
-                }
-            }
+                    dynamicAnimation: {
+                        speed: 5000
+                    },
+                },
+            },
+            datalabels: { enabled: false },
+            markers: { size: 0 },
+            title: {
+                text: "D(AU)-Jones",
+                style: { color: "#e0d9cf" },
+            },
+            series: initSeries ? initSeries : [],
+            xaxis: {
+                type: 'datetime',
+                labels: {
+                    style: { colors: ["#fff"] },
+                },
+                // 10 Einträge * Intervallänge (in ms)
+                range: 10 * 5000,
+            },
+            yaxis: {
+                title: {
+                    text: "Kurs",
+                    style: { color: "#e0d9cf" },
+                },
+                labels: {
+                    style: { colors: ["#fff"] },
+                },
+            },
+            legend: {
+                position: 'top',
+                labels: {
+                    colors: ['#fff'],
+                },
+            },
+            tooltip: {
+                x: { format: "H:mm:ss" },
+            },
+            noData: {
+                text: "Keine Daten...",
+            },
         });
+
+        chart.render();
+        return chart;
     }
 
-    updateData(firmen) {
+    updateData(updates) {
         const zeit = new Date().toLocaleTimeString();
-        
-        // Aktualisiere Labels (Zeitachse)
-        this.chart.data.labels = Array(20).fill('');
-        this.chart.data.labels[19] = zeit;
 
-        // Aktualisiere Datensätze
-        this.chart.data.datasets = Object.values(firmen).map(firma => ({
-            label: firma.name,
-            data: firma.verlauf,
-            borderColor: firma.color,
-            backgroundColor: firma.color + '33',
-            tension: 0.3
-        }));
+        console.log("updating with:");
+        console.log(updates);
 
-        this.chart.update('none'); // Update ohne Animation
+        this.chart.appendData(updates);
     }
 }
 
