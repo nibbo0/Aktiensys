@@ -115,7 +115,25 @@ The top level requirements are:
 
 4. DB setup complete!
 
----
+**Javascript**:
+
+For stock chart rendering, DAU-JONES uses a patched version of [ApexCharts]
+which allows access to the easing configuration for the underlying [SVG.js]
+library.
+
+1. To setup ApexCharts, download the library file (patch file was generated for
+   version 4.7.0) to `static/js/apexcharts.js`. This can be done by executing
+   the following:
+
+   ```
+   shell> wget --directory-prefix=static/js/ 'https://cdn.jsdelivr.net/npm/apexcharts@4.7.0/dist/apexcharts.js'
+   ```
+
+2. Apply the patch file to enable animation easing config option:
+
+   ```
+   shell> patch -p0 < apexcharts-easing.patch
+   ```
 
 [^1]: You may change the user, role and database name to whatever you like if
     you prefer other naming conventions or need to resolve naming conflicts. You
@@ -129,3 +147,5 @@ The top level requirements are:
 [MariaDB Connector FAQ]: https://mariadb-corporation.github.io/mariadb-connector-python/faq.html#installation
 [MariaDB string literals]: https://mariadb.com/kb/en/string-literals/
 [Python literals]: https://docs.python.org/3/reference/lexical_analysis.html#literals
+[ApexCharts]: https://apexcharts.com/
+[SVG.js]: https://svgjs.dev/docs/3.2/
