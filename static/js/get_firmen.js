@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     row.className = 'firmen-list-row';
     row.innerHTML = `
         <input type="checkbox">
-        <input type="text" value="${(firma.stock_name && firma.stock_name.trim()) ? firma.stock_name : 'Unnamed'}" placeholder="Firmenname">
+        <input type="text" value="${(firma.name && firma.name.trim()) ? firma.name : 'Unnamed'}" placeholder="Firmenname">
         <input type="color" value="${firma.color ? firma.color : '#ffffff'}" placeholder="Farbe">
         <input type="text" class="kursfeld" value="${aktuellerKurs}" placeholder="Aktueller Kurs" readonly>
         <input type="text" class="kurszielfeld" value="${kursziel}" placeholder="Aktuelles Kursziel" readonly>
@@ -54,14 +54,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const alterKurs = kursfeld ? kursfeld.value : '';
                 const kursResp = await fetch(`/api/kurse/verlauf/${firmaId}?eintraege=1`);
                 const kursData = await kursResp.json();
-                const aktuellerKurs = (kursData[firmaId] && kursData[firmaId][0] && kursData[firmaId][0].price) || '';
+                const aktuellerKurs = (kursData && kursData[0] && kursData[0].price) || '';
                 if (kursfeld) kursfeld.value = aktuellerKurs;
     
                 // Kursziel laden und setzen
                 const zielResp = await fetch(`/api/kurse/vorschau/${firmaId}?eintraege=1`);
                 const zielData = await zielResp.json();
-                const kursziel = (zielData[firmaId] && zielData[firmaId].price) || '';
-                const validAfter = zielData[firmaId] && zielData[firmaId].valid_after;
+                const kursziel = (zielData && zielData.price) || '';
+                const validAfter = zielData && zielData.valid_after;
                 const kurszielfeld = row.querySelector('.kurszielfeld');
                 const kurszieleditfeld = row.querySelector('.kurszieleditfield');
                 const countdownField = row.querySelector('.countdown');
@@ -87,5 +87,5 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // Fehler ignorieren oder anzeigen
             }
         }
-    }, 500);
+    }, 5000);
 });

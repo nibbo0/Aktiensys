@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             // Farbe speichern
-            await fetch(`/api/aktien/${firmaId}/color?color=${encodeURIComponent(neueFarbe)}`, {
+            await fetch(`/api/aktien/${firmaId}/farbe?farbe=${encodeURIComponent(neueFarbe)}`, {
                 method: 'PUT'
             });
 
