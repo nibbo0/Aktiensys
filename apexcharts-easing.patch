@@ -1,0 +1,49 @@
+--- static/js/apexcharts.js	2025-07-07 17:01:58.779517592 +0200
++++ static/js/apexcharts.custom.js	2025-07-08 13:24:00.651640864 +0200
+@@ -724,6 +724,19 @@
+         var me = this;
+         var w = this.w;
+         var delayFactor = 0;
++        var easing;
++        switch(w.config.chart.animations.easing) {
++        case 'easeInOut':
++            easing = '<>';
++            break;
++        case 'easeOut':
++            easing = '>';
++        case 'easeIn':
++            easing = '<';
++        case 'linear':
++        default:
++            easing = '-';
++        };
+         if (w.config.chart.animations.animateGradually.enabled) {
+           delayFactor = w.config.chart.animations.animateGradually.delay;
+         }
+@@ -731,7 +744,7 @@
+           // disabled due to this bug - https://github.com/apexcharts/vue-apexcharts/issues/75
+           delayFactor = 0;
+         }
+-        me.morphSVG(el, realIndex, j, w.config.chart.type === 'line' && !w.globals.comboCharts ? 'stroke' : fill, pathFrom, pathTo, speed, delay * delayFactor);
++        me.morphSVG(el, realIndex, j, w.config.chart.type === 'line' && !w.globals.comboCharts ? 'stroke' : fill, pathFrom, pathTo, speed, delay * delayFactor, easing);
+       }
+     }, {
+       key: "showDelayedElements",
+@@ -760,7 +773,7 @@
+       // SVG.js animation for morphing one path to another
+     }, {
+       key: "morphSVG",
+-      value: function morphSVG(el, realIndex, j, fill, pathFrom, pathTo, speed, delay) {
++      value: function morphSVG(el, realIndex, j, fill, pathFrom, pathTo, speed, delay, easing) {
+         var _this = this;
+         var w = this.w;
+         if (!pathFrom) {
+@@ -786,7 +799,7 @@
+         if (!w.globals.shouldAnimate) {
+           speed = 1;
+         }
+-        el.plot(pathFrom).animate(1, delay).plot(pathFrom).animate(speed, delay).plot(pathTo).after(function () {
++        el.plot(pathFrom).animate(1, delay).plot(pathFrom).animate(speed, delay).ease(easing).plot(pathTo).after(function () {
+           // a flag to indicate that the original mount function can return true now as animation finished here
+           if (Utils$1.isNumber(j)) {
+             if (j === w.globals.series[w.globals.maxValsInArrayIndex].length - 2 && w.globals.shouldAnimate) {
