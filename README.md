@@ -123,16 +123,16 @@ library.
 
 1. To setup ApexCharts, download the library file (patch file was generated for
    version 4.7.0) to `static/js/apexcharts.js`. This can be done by executing
-   the following:
+   the following in the project root directory:
 
    ```
-   shell> wget --directory-prefix=static/js/ 'https://cdn.jsdelivr.net/npm/apexcharts@4.7.0/dist/apexcharts.js'
+   shell$ wget --directory-prefix=static/js/ 'https://cdn.jsdelivr.net/npm/apexcharts@4.7.0/dist/apexcharts.js'
    ```
 
 2. Apply the patch file to enable animation easing config option:
 
    ```
-   shell> patch -p0 < apexcharts-easing.patch
+   shell$ patch -p0 < apexcharts-easing.patch
    ```
 
 [^1]: You may change the user, role and database name to whatever you like if
