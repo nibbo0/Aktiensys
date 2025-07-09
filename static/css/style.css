@@ -335,3 +335,13 @@ footer {
     background: #ffb84d;
     color: #222;
 }
+
+/* /kursansicht */
+.apexcharts-toolbar {
+    opacity: 0;
+    transition: opacity 0.3s ease !important;
+}
+
+.apexcharts-toolbar:hover {
+    opacity: 1;
+}
