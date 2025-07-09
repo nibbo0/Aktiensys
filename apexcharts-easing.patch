@@ -1,6 +1,6 @@
---- static/js/apexcharts.js	2025-07-07 17:01:58.779517592 +0200
-+++ static/js/apexcharts.custom.js	2025-07-08 13:24:00.651640864 +0200
-@@ -724,6 +724,19 @@
+--- static/js/apexcharts.js	2025-07-09 17:57:04.863991705 +0200
++++ static/js/apexcharts.custom.js	2025-07-09 17:55:51.460806880 +0200
+@@ -724,6 +724,22 @@
          var me = this;
          var w = this.w;
          var delayFactor = 0;
@@ -11,16 +11,19 @@
 +            break;
 +        case 'easeOut':
 +            easing = '>';
++            break;
 +        case 'easeIn':
 +            easing = '<';
++            break;
 +        case 'linear':
 +        default:
 +            easing = '-';
++            break;
 +        };
          if (w.config.chart.animations.animateGradually.enabled) {
            delayFactor = w.config.chart.animations.animateGradually.delay;
          }
-@@ -731,7 +744,7 @@
+@@ -731,7 +747,7 @@
            // disabled due to this bug - https://github.com/apexcharts/vue-apexcharts/issues/75
            delayFactor = 0;
          }
@@ -29,7 +32,7 @@
        }
      }, {
        key: "showDelayedElements",
-@@ -760,7 +773,7 @@
+@@ -760,7 +776,7 @@
        // SVG.js animation for morphing one path to another
      }, {
        key: "morphSVG",
@@ -38,7 +41,7 @@
          var _this = this;
          var w = this.w;
          if (!pathFrom) {
-@@ -786,7 +799,7 @@
+@@ -786,7 +802,7 @@
          if (!w.globals.shouldAnimate) {
            speed = 1;
          }
