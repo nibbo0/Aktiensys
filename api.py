@@ -163,7 +163,96 @@ def set_stock_color(stock_id: int):
     name = request.args.get("farbe", type=str)
     return stock.recolor_stock(db, stock_id, name)
 
+# API for purchasing stocks and showing stocks
 
+@api.route('/aktien/<int:stock_id>/summary')
+def get_stock_summary(stock_id):
+    db = get_db()
+    cursor = db.cursor()
+    try:
+        # SQL-Abfrage ausführen
+        cursor.execute(
+            """
+            SELECT
+                SUM(purchase_amount) AS total_amount
+            FROM transactions
+            WHERE stock_id = %s
+            """,
+            (stock_id,)
+        )
+        result = cursor.fetchone()
+
+        # Wenn keine Daten gefunden werden, total_amount = 0 zurückgeben
+        total_amount = result[0] if result and result[0] is not None else 0
+        return jsonify({"total_amount": int(total_amount)})  # Sicherstellen, dass es eine Zahl ist
+
+    except Exception as e:
+        # Fehlerbehandlung
+        return jsonify({"error": "Fehler beim Abrufen der Daten", "details": str(e)}), 500
+
+
+@api.route('/aktien/<int:stock_id>/kaufen', methods=['PUT'])
+async def buy_stock(stock_id):
+    db = get_db()
+    try:
+        # JSON-Daten asynchron abrufen
+        data = await request.get_json()
+        current_app.logger.info(f"Empfangene Daten: {data}")
+        amount = data.get('amount', 0)
+
+        if amount <= 0:
+            current_app.logger.warning(f"Ungültige Anzahl: {amount}")
+            return jsonify({"error": "Ungültige Anzahl"}), 400
+
+        cursor = db.cursor()
+        current_app.logger.info(f"Kaufanfrage erhalten: stock_id={stock_id}, amount={amount}")
+        cursor.execute(
+            """
+            INSERT INTO transactions (stock_id, purchase_amount, total_purchase_price)
+            VALUES (%s, %s, %s)
+            """,
+            (stock_id, amount, 0)  # Gesamtpreis kann später berechnet werden
+        )
+        db.commit()
+        current_app.logger.info(f"Aktien erfolgreich gekauft: stock_id={stock_id}, amount={amount}")
+        return jsonify({"message": "Aktien erfolgreich gekauft"}), 200
+    except Exception as e:
+        db.rollback()
+        current_app.logger.error(f"Fehler beim Kauf der Aktien: {e}")
+        return jsonify({"error": "Fehler beim Kauf der Aktien", "details": str(e)}), 500
+
+@api.route('/aktien/<int:stock_id>/verkaufen', methods=['PUT'])
+async def sell_stock(stock_id):
+    db = get_db()
+    try:
+        # JSON-Daten asynchron abrufen
+        data = await request.get_json()
+        current_app.logger.info(f"Empfangene Verkaufsdaten: {data}")
+        amount = data.get('amount', 0)
+
+        if amount >= 0:  # Verkauf muss eine negative Anzahl sein
+            current_app.logger.warning(f"Ungültige Verkaufsanzahl: {amount}")
+            return jsonify({"error": "Ungültige Verkaufsanzahl"}), 400
+
+        cursor = db.cursor()
+        current_app.logger.info(f"Verkaufsanfrage erhalten: stock_id={stock_id}, amount={amount}")
+        cursor.execute(
+            """
+            INSERT INTO transactions (stock_id, purchase_amount, total_purchase_price)
+            VALUES (%s, %s, %s)
+            """,
+            (stock_id, amount, 0)  # Gesamtpreis kann später berechnet werden
+        )
+        db.commit()
+        current_app.logger.info(f"Aktien erfolgreich verkauft: stock_id={stock_id}, amount={amount}")
+        return jsonify({"message": "Aktien erfolgreich verkauft"}), 200
+    except Exception as e:
+        db.rollback()
+        current_app.logger.error(f"Fehler beim Verkauf der Aktien: {e}")
+        return jsonify({"error": "Fehler beim Verkauf der Aktien", "details": str(e)}), 500
+
+
+        
 @api.route('/markt/update')
 def reload_market_engine():
     num_loaded = current_app.config["MARKET_ENGINE"].reload_stocks(get_db())
@@ -187,3 +276,4 @@ def start_market_engine():
 def stop_market_engine():
     current_app.config["MARKET_ENGINE"].threadsafe_stop()
     return ('', 200)
+

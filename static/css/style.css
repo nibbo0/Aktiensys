@@ -61,6 +61,7 @@ header {
     text-decoration: none;
     color: #ffffff;
     transition: color 0.2s;
+    font-size: 40px;
 }
 
 .headerItem:hover {
@@ -255,7 +256,7 @@ footer {
 .shop-list-header,
 .shop-row {
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr 40px 60px 40px 80px 80px;
+    grid-template-columns: 2fr 1fr 1fr 40px 60px 40px 100px 80px 80px;
     align-items: center;
     gap: 12px;
     width: 100%;
