@@ -21,6 +21,9 @@ class KursGraph {
                     },
                 },
             },
+            theme: {
+                mode: 'dark',
+            },
             datalabels: { enabled: false },
             markers: { size: 0 },
             title: {
@@ -34,7 +37,7 @@ class KursGraph {
                     style: { colors: ["#fff"] },
                 },
                 // 10 Einträge * Intervallänge (in ms)
-                range: 10 * 5000,
+                range: 10 * 60_000,
             },
             yaxis: {
                 title: {
@@ -63,12 +66,8 @@ class KursGraph {
         return chart;
     }
 
+
     updateData(updates) {
-        const zeit = new Date().toLocaleTimeString();
-
-        console.log("updating with:");
-        console.log(updates);
-
         this.chart.appendData(updates);
     }
 }
