@@ -64,8 +64,8 @@ class MarketEngineStock(ABC):
 
     def get_latest_price(self):
         try:
-            after_sort = sorted(self.prices, key=lambda p: p[1], reverse=True)
-            return after_sort[0][0]
+            after_sort = sorted(self.prices, key=lambda p: p[0], reverse=True)
+            return after_sort[0][1]
         except IndexError:
             return None
 
@@ -98,7 +98,7 @@ class MarketEngineDBStock(MarketEngineStock):
             prices = stock_db.get_prices(
                 self._safe_get_db(), self.stock_id, fetch_rows=self.HISTORY_LEN
             )
-            self.prices = [list(v.values()) for v in prices]
+            self.prices = [(v["valid_after"], int(v["price"])) for v in prices]
         except Exception as e:
             raise RuntimeError(
                 f"Unable to refresh stock {self.stock_id} from database"

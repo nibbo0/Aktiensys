@@ -16,7 +16,7 @@ def _ensure_stock(db: Connection, stock_id: int):
 
 def get_prices(db: Connection, stock_id: int,
                fetch_rows: Union[int, Literal["all", "first"]] = 1):
-    sql = """SELECT * FROM prices
+    sql = """SELECT valid_after, price FROM prices
     WHERE stock_id = (?)
     ORDER BY valid_after DESC"""
     _ensure_stock(db, stock_id)
