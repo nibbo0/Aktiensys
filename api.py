@@ -169,7 +169,8 @@ def reload_market_engine():
 @api.route('/markt/status')
 def get_market_engine_status():
     is_running = current_app.config["MARKET_ENGINE"].is_running()
-    return jsonify({"is_running": is_running})
+    num_loaded = current_app.config["MARKET_ENGINE"].get_num_stocks()
+    return jsonify({"is_running": is_running, "num_loaded": num_loaded})
 
 
 @api.route('/markt/start')

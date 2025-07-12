@@ -157,6 +157,9 @@ class BaseMarketEngine(ABC):
         current_app.logger.info(f"loaded {num_loaded} stocks from db")
         return num_loaded
 
+    def get_num_stocks(self):
+        return len(self._stocks)
+
     def _wrap_scheduled(self, callback: Callable, *args, **kwargs):
         def _scheduled_inner():
             callback(*args, **kwargs)
