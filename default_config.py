@@ -51,4 +51,5 @@ MARKET_ENGINE_PARAMS = {
     "interval": timedelta(minutes=15),
     "max_change": 4,
     "min_value": 1,
+    "start_value": 4,
 }

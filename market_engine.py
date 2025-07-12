@@ -63,7 +63,11 @@ class MarketEngineStock(ABC):
             listener(self, new_price, new_valid)
 
     def get_latest_price(self):
-        return sorted(_stock.prices, key=lambda p: p[1], reverse=True)[0]
+        try:
+            after_sort = sorted(self.prices, key=lambda p: p[1], reverse=True)
+            return after_sort[0][0]
+        except IndexError:
+            return None
 
 
 class MarketEngineDBStock(MarketEngineStock):
@@ -78,7 +82,6 @@ class MarketEngineDBStock(MarketEngineStock):
 
     def __init__(self, stock_id):
         super().__init__(stock_id)
-        self.prices = []
 
         self.refresh()
 
@@ -95,7 +98,7 @@ class MarketEngineDBStock(MarketEngineStock):
             prices = stock_db.get_prices(
                 self._safe_get_db(), self.stock_id, fetch_rows=self.HISTORY_LEN
             )
-            self.prices = [v.values() for v in prices]
+            self.prices = [list(v.values()) for v in prices]
         except Exception as e:
             raise RuntimeError(
                 f"Unable to refresh stock {self.stock_id} from database"
@@ -259,13 +262,16 @@ class RandomMarketEngine(BaseMarketEngine):
 
 
 class RandomChangeMarketEngine(BaseMarketEngine):
-    def __init__(self, app, interval, max_change: int, min_value: int, step: float = 1):
+    def __init__(self, app, interval, max_change: int, min_value: int,
+                 start_value: int, step: float = 1):
         super().__init__(app, interval)
         self.max_change = max_change
         self.min_value = min_value
+        self.start_value = start_value
         self.step = step
 
     def _generate_price(self, _stock: MarketEngineStock, _context) -> int:
-        max_price = _stock.get_latest_price() + self.max_change
-        min_price = max(self.min_value, _stock.get_latest_price() - self.max_change)
+        last_price = _stock.get_latest_price() or self.start_value
+        max_price = last_price + self.max_change
+        min_price = max(self.min_value, last_price - self.max_change)
         return random.randrange(min_price, max_price, self.step)
