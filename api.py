@@ -122,7 +122,11 @@ def set_stock_preview(stock_id: int):
     preview = request.args.get("wert", type=int)
     if preview is None:
         return ApiError.INPUT.as_response("Parameter 'wert' muss ganzzahlig sein.")
-    return stock.set_price_preview(db, stock_id, preview)
+    res = stock.set_price_preview(db, stock_id, preview)
+    # HACK market engine fails when reloading this from within its own context.
+    # no idea why. it gets an old value from the db for some reason.
+    current_app.config["MARKET_ENGINE"].reload_stocks(db)
+    return res
 
 
 @api.route('/aktien/', methods=['POST'])

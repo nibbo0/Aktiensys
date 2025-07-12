@@ -78,7 +78,7 @@ class MarketEngineDBStock(MarketEngineStock):
     be beneficial to track the preview furthest in the future.
     """
     prices: list[tuple[float, datetime]]
-    HISTORY_LEN: int = 40
+    HISTORY_LEN: int = 10
 
     def __init__(self, stock_id):
         super().__init__(stock_id)
@@ -278,3 +278,23 @@ class RandomChangeMarketEngine(BaseMarketEngine):
         max_price = last_price + self.max_change
         min_price = max(self.min_value, last_price - self.max_change)
         return random.randrange(min_price, max_price, self.step)
+
+
+class GaussChangeMarketEngine(BaseMarketEngine):
+    def __init__(self, app, interval, sigma: float, min_value: int,
+                 start_value: int, step: float = 1):
+        super().__init__(app, interval)
+        self.sigma = sigma
+        self.min_value = min_value
+        self.start_value = start_value
+        self.step = step
+
+    def _generate_price(self, _stock: MarketEngineStock, _context) -> int:
+        last_price = _stock.get_latest_price() or self.start_value
+        price = random.gauss(last_price, self.sigma)
+        rounded = self.step * round(price / self.step)
+        # if rounded < last_price:
+        #     rounded += self.step
+        current_app.logger.debug("generated gauss %.2f (rounded: %.2f) following %.2f",
+                                 price, rounded, last_price)
+        return max(self.min_value, rounded)

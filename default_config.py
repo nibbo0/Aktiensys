@@ -2,7 +2,7 @@ import logging
 import os
 from datetime import timedelta
 
-from market_engine import RandomChangeMarketEngine
+from market_engine import GaussChangeMarketEngine
 
 MARIADB_CONNECTION = {
     "user": "dau_jones",
@@ -46,10 +46,10 @@ LOGGING = {
 }
 
 
-MARKET_ENGINE_CLASS = RandomChangeMarketEngine
+MARKET_ENGINE_CLASS = GaussChangeMarketEngine
 MARKET_ENGINE_PARAMS = {
     "interval": timedelta(minutes=15),
-    "max_change": 4,
+    "sigma": 1.2,
     "min_value": 1,
     "start_value": 4,
 }
